@@ -38,7 +38,8 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         try {
             AtmosphericInfoHolder.addDataPoint(iataCode, pointType, gson.fromJson(datapointJson, DataPoint.class));
         } catch (WeatherException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error while updating weather", e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
         return Response.status(Response.Status.OK).build();
     }
@@ -68,6 +69,9 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         } catch (AirportAdditionException e) {
             LOGGER.log(Level.SEVERE, "Error while adding an airport", e);
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (NumberFormatException nfe) {
+            LOGGER.log(Level.SEVERE, "Wrong number format", nfe);
+            return Response.status(Response.Status.BAD_REQUEST).entity(nfe.getMessage()).build();
         }
         return Response.status(Response.Status.OK).build();
     }
