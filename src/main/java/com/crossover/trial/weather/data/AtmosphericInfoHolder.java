@@ -14,21 +14,13 @@ import static com.crossover.trial.weather.data.MathUtils.calculateDistance;
  * Created by AnVIgnatev on 09.09.2016.
  */
 public class AtmosphericInfoHolder {
-    //TODO encapsulate
-    /**
-     * all known airports
-     */
-//    public static List<AirportData> airportData = new ArrayList<>();
-    /**
-     * atmospheric information for each airport, idx corresponds with airportData
-     */
-//    static List<AtmosphericInformation> atmosphericInformation = new LinkedList<>();
-    static {
-        init();
-    }
 
     private static Map<AirportData, AtmosphericInformation> atmosphericInformation =
             new ConcurrentHashMap<>();
+
+    static {
+        init();
+    }
 
     /**
      * Add a new known airport to our list.
@@ -65,7 +57,8 @@ public class AtmosphericInfoHolder {
                 .findFirst().orElse(null);
     }
 
-    public static List<AtmosphericInformation> getAtmosphericInformation(String iata, double radius) throws AirportNotFoundException {
+    public static List<AtmosphericInformation> getAtmosphericInformation(String iata, double radius)
+            throws AirportNotFoundException {
         AirportData foundAirport = findAirportData(iata);
         if (foundAirport == null) throw new AirportNotFoundException("Airport not found: " + iata);
 
@@ -150,9 +143,8 @@ public class AtmosphericInfoHolder {
      * A dummy init method that loads hard coded data
      */
     public static void init() {
-//        airportData.clear();
         atmosphericInformation.clear();
-        Statistics.airportRequestCounts.clear();
+        Statistics.clear();
 
         try {
             addAirport("BOS", 42.364347, -71.005181);

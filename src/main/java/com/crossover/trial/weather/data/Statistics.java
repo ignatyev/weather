@@ -25,7 +25,7 @@ public class Statistics {
      */
     //TODO concurrent
     //TODO private
-    static Map<AirportData, AtomicInteger> airportRequestCounts = new ConcurrentHashMap<>();
+    private static Map<AirportData, AtomicInteger> airportRequestCounts = new ConcurrentHashMap<>();
     /**
      * TODO add doc
      */
@@ -90,4 +90,8 @@ public class Statistics {
                 .count();
     }
 
+    static void clear() {
+        airportRequestCounts.clear();
+        radiusRequestCounts.clear();
+    }
 }
