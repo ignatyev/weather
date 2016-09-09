@@ -23,8 +23,6 @@ public class Statistics {
      * we don't want to write this to disk, but will pull it off using a REST request and aggregate with other
      * performance metrics
      */
-    //TODO concurrent
-    //TODO private
     private static Map<AirportData, AtomicInteger> airportRequestCounts = new ConcurrentHashMap<>();
     /**
      * TODO add doc
@@ -38,9 +36,11 @@ public class Statistics {
      * @param radius query radius
      */
     public static void updateRequestFrequency(String iata, Double radius) {
-        AirportData airportData = findAirportData(iata); //TODO sync?
-        airportRequestCounts.getOrDefault(airportData, new AtomicInteger(0)).incrementAndGet();
-        radiusRequestCounts.getOrDefault(radius, new AtomicInteger(0)).incrementAndGet();
+        AirportData airportData = findAirportData(iata);
+        airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(1));
+        airportRequestCounts.get(airportData).incrementAndGet();
+        radiusRequestCounts.putIfAbsent(radius, new AtomicInteger(1));
+        radiusRequestCounts.get(radius).incrementAndGet();
     }
 
     public static Map<String, Object> getStats() {
@@ -76,7 +76,7 @@ public class Statistics {
 //TODO        airportRequestCounts.entrySet().stream().collect(Collectors.)
         // fraction of queries
         for (AirportData data : airportRequestCounts.keySet()) {
-            double airportReqCount = airportRequestCounts.getOrDefault(data, new AtomicInteger(0)).get();
+            double airportReqCount = airportRequestCounts.get(data).get();
             double frac = airportReqCount / totalRequests;
             freq.put(data.getIata(), frac);
         }
@@ -90,6 +90,7 @@ public class Statistics {
                 .count();
     }
 
+    //TODO remove
     static void clear() {
         airportRequestCounts.clear();
         radiusRequestCounts.clear();
