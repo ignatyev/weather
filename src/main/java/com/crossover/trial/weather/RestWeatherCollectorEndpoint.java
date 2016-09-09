@@ -7,10 +7,10 @@ import com.google.gson.Gson;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * A REST implementation of the WeatherCollector API. Accessible only to airport weather collection
@@ -46,10 +46,8 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     @Override
     public Response getAirports() {
-        Set<String> retval = new HashSet<>();
-        for (AirportData ad : AtmosphericInfoHolder.airportData) {
-            retval.add(ad.getIata());
-        }
+        Set<String> retval = AtmosphericInfoHolder.getAirports().stream()
+                .map(AirportData::getIata).collect(Collectors.toSet());
         return Response.status(Response.Status.OK).entity(retval).build();
     }
 
@@ -69,7 +67,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
             AtmosphericInfoHolder.addAirport(iata, Double.valueOf(latString), Double.valueOf(longString));
         } catch (AirportAdditionException e) {
             LOGGER.log(Level.SEVERE, "Error while adding an airport", e);
-            Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
         return Response.status(Response.Status.OK).build();
     }

@@ -2,11 +2,11 @@ package com.crossover.trial.weather.data;
 
 import com.crossover.trial.weather.*;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
+import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.crossover.trial.weather.data.MathUtils.calculateDistance;
 
@@ -62,32 +62,18 @@ public class AtmosphericInfoHolder {
                 .findFirst().orElse(null);
     }
 
-    /**
-     * Given an iataCode find the airport data
-     *
-     * @param iataCode as a string
-     * @return airport data or null if not found
-     */
-    public static int getAirportDataIdx(String iataCode) {
-        AirportData ad = findAirportData(iataCode);
-        return airportData.indexOf(ad);
-    }
-
-    public static List<AtmosphericInformation> getAtmosphericInformation(String iata, double radius) {
+    public static List<AtmosphericInformation> getAtmosphericInformation(String iata, double radius) throws AirportNotFoundException {
         List<AtmosphericInformation> retval = new ArrayList<>();
+        AirportData foundAirport = findAirportData(iata);
+        if (foundAirport == null) throw new AirportNotFoundException("Airport not found: " + iata);
+
         if (radius == 0) {
-            int idx = getAirportDataIdx(iata);
-            retval.add(atmosphericInformation.get(idx));
+            retval.add(atmosphericInformation.get(foundAirport));
         } else {
-            AirportData ad = findAirportData(iata);
-            for (int i = 0; i < airportData.size(); i++) {
-                if (calculateDistance(ad, airportData.get(i)) <= radius) {
-                    AtmosphericInformation ai = atmosphericInformation.get(i);
-                    if (!ai.isEmpty()) {
-                        retval.add(ai);
-                    }
-                }
-            }
+            atmosphericInformation.entrySet().stream()
+                    .filter(entry -> calculateDistance(foundAirport, entry.getKey()) <= radius)
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
         }
         return retval;
     }
@@ -101,8 +87,11 @@ public class AtmosphericInfoHolder {
      * @throws WeatherException if the update can not be completed
      */
     public static void addDataPoint(String iataCode, String pointType, DataPoint dp) throws WeatherException {
-        int airportDataIdx = getAirportDataIdx(iataCode);
-        AtmosphericInformation ai = atmosphericInformation.get(airportDataIdx);
+        AirportData airportData = findAirportData(iataCode);
+        if (airportData == null) {
+            throw new WeatherException(String.format("Airport %s was not found", iataCode));
+        }
+        AtmosphericInformation ai = atmosphericInformation.get(airportData);
         updateAtmosphericInformation(ai, pointType, dp);
     }
 
@@ -113,7 +102,8 @@ public class AtmosphericInfoHolder {
      * @param pointType the data point type as a string
      * @param dp        the actual data point
      */
-    private static void updateAtmosphericInformation(AtmosphericInformation ai, String pointType, DataPoint dp) throws WeatherException {
+    private static void updateAtmosphericInformation(AtmosphericInformation ai, String pointType, DataPoint dp)
+            throws WeatherException {
         final DataPointType dptype = DataPointType.valueOf(pointType.toUpperCase());
 
         if (pointType.equalsIgnoreCase(DataPointType.WIND.name())) {
@@ -164,14 +154,14 @@ public class AtmosphericInfoHolder {
             }
         }
 
-        throw new IllegalStateException("couldn't update atmospheric data");
+        throw new WeatherException("couldn't update atmospheric data");
     }
 
     /**
      * A dummy init method that loads hard coded data
      */
     public static void init() {
-        airportData.clear();
+//        airportData.clear();
         atmosphericInformation.clear();
         Statistics.airportRequestCounts.clear();
 
@@ -184,5 +174,14 @@ public class AtmosphericInfoHolder {
         } catch (AirportAdditionException e) {
             e.printStackTrace(); // TODO: 09.09.2016
         }
+    }
+
+
+    public static Collection<AtmosphericInformation> getAtmosphericInformation() {
+        return Collections.unmodifiableCollection(atmosphericInformation.values());
+    }
+
+    public static Collection<AirportData> getAirports() {
+        return Collections.unmodifiableCollection(atmosphericInformation.keySet());
     }
 }

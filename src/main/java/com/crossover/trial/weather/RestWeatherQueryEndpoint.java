@@ -2,11 +2,13 @@ package com.crossover.trial.weather;
 
 import com.crossover.trial.weather.data.AtmosphericInfoHolder;
 import com.crossover.trial.weather.data.Statistics;
+import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 import com.google.gson.Gson;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.crossover.trial.weather.data.AtmosphericInfoHolder.getAtmosphericInformation;
@@ -54,7 +56,13 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
         double radius = radiusString == null || radiusString.trim().isEmpty() ? 0 : Double.valueOf(radiusString);
         updateRequestFrequency(iata, radius);
 
-        List<AtmosphericInformation> retval = getAtmosphericInformation(iata, radius);
+        List<AtmosphericInformation> retval;
+        try {
+            retval = getAtmosphericInformation(iata, radius);
+        } catch (AirportNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Error while requesting weather", e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
         return Response.status(Response.Status.OK).entity(retval).build();
     }
 

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.crossover.trial.weather.data.AtmosphericInfoHolder.*;
+import static com.crossover.trial.weather.data.AtmosphericInfoHolder.findAirportData;
 
 /**
  * Created by AnVIgnatev on 09.09.2016.
@@ -84,7 +84,7 @@ public class Statistics {
     }
 
     private static long getDatasize() {
-        return atmosphericInformation.stream()
+        return AtmosphericInfoHolder.getAtmosphericInformation().stream()
                 .filter((ai) -> !ai.isEmpty() && ai.getLastUpdateTime() > System.currentTimeMillis() - DAY_IN_MILLIS)
                 // TODO: 09.09.2016 refactor date
                 .count();
