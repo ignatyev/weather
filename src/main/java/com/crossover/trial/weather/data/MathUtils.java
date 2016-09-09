@@ -16,7 +16,7 @@ class MathUtils {
      * @param ad2 airport 2
      * @return the distance in KM
      */
-    static double calculateDistance(AirportData ad1, AirportData ad2) {
+    static double calculateDistance(AirportData ad1, AirportData ad2) { // TODO: 09.09.2016 check
         double deltaLat = Math.toRadians(ad2.getLatitude() - ad1.getLatitude());
         double deltaLon = Math.toRadians(ad2.getLongitude() - ad1.getLongitude());
         double a =  Math.pow(Math.sin(deltaLat / 2), 2) + Math.pow(Math.sin(deltaLon / 2), 2)

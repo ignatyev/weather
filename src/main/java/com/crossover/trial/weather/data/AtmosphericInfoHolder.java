@@ -68,7 +68,7 @@ public class AtmosphericInfoHolder {
             retval.add(atmosphericInformation.get(foundAirport));
         } else {
             retval = atmosphericInformation.entrySet().stream()
-                    .filter(entry -> calculateDistance(foundAirport, entry.getKey()) <= radius)
+                    .filter(entry -> (calculateDistance(foundAirport, entry.getKey()) <= radius) && !entry.getValue().isEmpty())
                     .map(Map.Entry::getValue)
                     .collect(Collectors.toList());
         }
