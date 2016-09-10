@@ -28,6 +28,8 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     /** shared gson json to object factory */
     private static final Gson gson = new Gson();
 
+    private static final String MINUS = "-";
+
     /**
      * Retrieve service health including total size of valid data points and request frequency information.
      *
@@ -43,13 +45,14 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * return a list of matching atmosphere information.
      *
      * @param iata the iataCode
-     * @param radiusString the radius in km
+     * @param radiusString the radius in km, negative values are mapped to 0
      *
      * @return a list of atmospheric information
      */
     @Override
     public Response weather(String iata, String radiusString) {
-        double radius = radiusString == null || radiusString.trim().isEmpty() ? 0 : Double.valueOf(radiusString);
+        double radius = radiusString == null || radiusString.trim().isEmpty() || radiusString.startsWith(MINUS) ?
+                0 : Double.valueOf(radiusString);
         updateRequestFrequency(iata, radius);
 
         List<AtmosphericInformation> retval;

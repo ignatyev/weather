@@ -51,20 +51,22 @@ public class Statistics {
 
         retval.put("datasize", getDatasize());
         retval.put("iata_freq", getAirportFrequenciesMap());
-        retval.put("radius_freq", getRadiusesHistagram());
+        retval.put("radius_freq", getRadiusesHistogram());
 
         return retval;
     }
 
-    // FIXME: 09.09.2016 WTF??
-    private static int[] getRadiusesHistagram() {
+    private static int[] getRadiusesHistogram() {
         int maxRadius = radiusRequestCounts.keySet().stream()
                 .max(Double::compare)
                 .orElse(1000.0).intValue() + 1;
 
         int[] hist = new int[maxRadius];
         for (Map.Entry<Double, AtomicInteger> e : radiusRequestCounts.entrySet()) {
-            int i = e.getKey().intValue() % 10;
+            Double radius = e.getKey();
+            if (radius == null || radius < 0) continue;
+            // FIXME: 09.09.2016 WTF??
+            int i = radius.intValue() % 10;
             hist[i] += e.getValue().get();
         }
         return hist;
@@ -73,7 +75,7 @@ public class Statistics {
     private static Map<String, Double> getAirportFrequenciesMap() {
         Map<String, Double> freq = new HashMap<>();
         double totalRequests = airportRequestCounts.values().stream().mapToInt(AtomicInteger::get).sum();
-
+        if (totalRequests == 0) return freq;
 //TODO        airportRequestCounts.entrySet().stream().collect(Collectors.)
         // fraction of queries
         for (AirportData airportData : getAirports()) {
