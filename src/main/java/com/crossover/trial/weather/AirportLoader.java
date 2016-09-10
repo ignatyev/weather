@@ -6,13 +6,14 @@ import com.crossover.trial.weather.loader.Parser;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import static javax.ws.rs.HttpMethod.POST;
 
 /**
  * A simple airport loader which reads a file from disk and sends entries to the webservice
@@ -58,15 +59,11 @@ public class AirportLoader {
             while ((l = reader.readLine()) != null) {
                 try {
                     AirportData airportData = Parser.parse(l);
-                    /*AtmosphericInfoHolder.addAirport(airportData.getIata(), airportData.getLatitude(),
-                            airportData.getLongitude());
-                    */
-                    Response response = collect.path(AIRPORT_URI)
+                    collect.path(AIRPORT_URI)
                             .path(airportData.getIata())
                             .path(Double.toString(airportData.getLatitude()))
                             .path(Double.toString(airportData.getLongitude()))
-                            .request().post(null);
-                    System.out.println(response);
+                            .request().method(POST);
                 } catch (ParseException | NumberFormatException e) {
                     e.printStackTrace();
                 }

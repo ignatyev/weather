@@ -39,7 +39,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      */
     @Override
     public String ping() {
-        return gson.toJson(Statistics.getStats()); //TODO remove gson?
+        return gson.toJson(Statistics.getStats());
     }
 
     /**
