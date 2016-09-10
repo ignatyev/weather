@@ -25,10 +25,6 @@ public class AtmosphericInfoHolder {
     private static ConcurrentMap<AirportData, AtmosphericInformation> atmosphericInformation =
             new ConcurrentHashMap<>();
 
-    static {
-//        init();
-    }
-
     /**
      * Add a new known airport to our list.
      *
@@ -76,7 +72,8 @@ public class AtmosphericInfoHolder {
             retval = Collections.unmodifiableList(
                     atmosphericInformation.entrySet().stream()
                             .filter(entry ->
-                                    (calculateDistance(foundAirport, entry.getKey()) <= radius)
+                                    (Double.compare(
+                                            calculateDistance(foundAirport, entry.getKey()), radius) <= 0)
                                             && !entry.getValue().isEmpty())
                             .map(Map.Entry::getValue)
                             .collect(Collectors.toList()));
@@ -98,25 +95,6 @@ public class AtmosphericInfoHolder {
         atmosphericInformation.compute(airportData,
                 (airport, ai) -> ai.updateAtmosphericInformation(pointType, dp));
     }
-
-    /**
-     * A dummy init method that loads hard coded data
-     */
-    public static void init() {
-        atmosphericInformation.clear();
-        Statistics.clear();
-
-        try {
-            addAirport("BOS", 42.364347, -71.005181);
-            addAirport("EWR", 40.6925, -74.168667);
-            addAirport("JFK", 40.639751, -73.778925);
-            addAirport("LGA", 40.777245, -73.872608);
-            addAirport("MMU", 40.79935, -74.4148747);
-        } catch (AirportAdditionException e) {
-            e.printStackTrace(); // TODO: 09.09.2016
-        }
-    }
-
 
     public static Collection<AtmosphericInformation> getAtmosphericInformation() {
         return Collections.unmodifiableCollection(atmosphericInformation.values());

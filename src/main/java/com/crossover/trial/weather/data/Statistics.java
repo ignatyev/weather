@@ -30,6 +30,9 @@ public class Statistics {
      * TODO add doc
      */
     private static final Map<Double, AtomicInteger> radiusRequestCounts = new ConcurrentHashMap<>();
+    public static final String DATASIZE = "datasize";
+    public static final String IATA_FREQ = "iata_freq";
+    public static final String RADIUS_FREQ = "radius_freq";
 
     /**
      * Records information about how often requests are made
@@ -39,64 +42,56 @@ public class Statistics {
      */
     public static void updateRequestFrequency(String iata, Double radius) throws AirportNotFoundException {
         AirportData airportData = findAirportData(iata);
-        synchronized (airportRequestCounts) {
-            airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(0));
-            airportRequestCounts.get(airportData).incrementAndGet();
-        }
-        //TODO remove atomics or sync
-        synchronized (radiusRequestCounts) {
-            radiusRequestCounts.putIfAbsent(radius, new AtomicInteger(0));
-            radiusRequestCounts.get(radius).incrementAndGet();
-        }
+        airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(0));
+        airportRequestCounts.get(airportData).incrementAndGet();
+        radiusRequestCounts.putIfAbsent(radius, new AtomicInteger(0));
+        radiusRequestCounts.get(radius).incrementAndGet();
     }
 
     public static Map<String, Object> getStats() {
         Map<String, Object> retval = new HashMap<>();
 
-        retval.put("datasize", getDatasize());
-        retval.put("iata_freq", getAirportFrequenciesMap());
-        retval.put("radius_freq", getRadiusesHistogram());
+        retval.put(DATASIZE, getDatasize());
+        retval.put(IATA_FREQ, getAirportFrequenciesMap());
+        retval.put(RADIUS_FREQ, getRadiusesHistogram());
 
         return retval;
     }
 
     private static int[] getRadiusesHistogram() {
-        synchronized (radiusRequestCounts) {
-            int maxRadius = radiusRequestCounts.keySet().stream()
-                    .max(Double::compare)
-                    .orElse(1000.0).intValue() + 1;
+        int maxRadius = radiusRequestCounts.keySet().stream()
+                .max(Double::compare)
+                .orElse(1000.0).intValue() + 1;
 
-            int[] hist = new int[maxRadius];
-            for (Map.Entry<Double, AtomicInteger> e : radiusRequestCounts.entrySet()) {
-                Double radius = e.getKey();
-                if (radius == null || radius < 0) continue;
-                int i = radius.intValue() % 10;
-                hist[i] += e.getValue().get();
-            }
-            return hist;
+        int[] hist = new int[maxRadius];
+        for (Map.Entry<Double, AtomicInteger> e : radiusRequestCounts.entrySet()) {
+            Double radius = e.getKey();
+            if (radius == null || radius < 0) continue;
+            int i = radius.intValue() % 10;
+            hist[i] += e.getValue().get();
         }
+        return hist;
     }
 
     private static Map<String, Double> getAirportFrequenciesMap() {
-        synchronized (airportRequestCounts) {
-            Map<String, Double> freq = new HashMap<>();
-            double totalRequests = airportRequestCounts.values().stream().mapToInt(AtomicInteger::get).sum();
-            if (totalRequests == 0) return freq;
+        Map<String, Double> freq = new HashMap<>();
+        double totalRequests = airportRequestCounts.values().stream().mapToInt(AtomicInteger::get).sum();
+        if (totalRequests == 0) return freq;
 //TODO        airportRequestCounts.entrySet().stream().collect(Collectors.)
-            // fraction of queries
-            for (AirportData airportData : getAirports()) {
-                AtomicInteger airportRequests = airportRequestCounts.get(airportData);
-                double airportReqCount;
-                if (airportRequests == null) {
-                    airportReqCount = 0;
-                } else {
-                    airportReqCount = airportRequests.get();
-                }
-                double frac = airportReqCount / totalRequests;
-                freq.put(airportData.getIata(), frac);
+        // fraction of queries
+        for (AirportData airportData : getAirports()) {
+            AtomicInteger airportRequests = airportRequestCounts.get(airportData);
+            double airportReqCount;
+            if (airportRequests == null) {
+                airportReqCount = 0;
+            } else {
+                airportReqCount = airportRequests.get();
             }
-            return freq;
+            double frac = airportReqCount / totalRequests;
+            freq.put(airportData.getIata(), frac);
         }
+        return freq;
+
     }
 
     private static long getDatasize() {

@@ -85,7 +85,6 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         return Response.status(Response.Status.OK).build();
     }
 
-
     @Override
     public Response deleteAirport(String iata) {
         try {
@@ -102,5 +101,4 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         System.exit(0);
         return Response.noContent().build();
     }
-
 }
