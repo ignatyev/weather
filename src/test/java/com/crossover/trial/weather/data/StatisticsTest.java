@@ -1,6 +1,10 @@
 package com.crossover.trial.weather.data;
 
 import com.crossover.trial.weather.AirportData;
+import com.crossover.trial.weather.DataPoint;
+import com.crossover.trial.weather.rest.RestWeatherCollectorEndpoint;
+import com.crossover.trial.weather.rest.RestWeatherQueryEndpoint;
+import com.google.gson.Gson;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,6 +21,7 @@ public class StatisticsTest {
 
     public static final String IATA_CODE = "TEST";
     public static final String IATA_CODE2 = "TEST2";
+    private Gson _gson = new Gson();
 
     @Before
     public void setUp() throws Exception {
@@ -65,7 +70,15 @@ public class StatisticsTest {
     @Test
     public void getStats() throws Exception {
         Statistics.updateRequestFrequency(IATA_CODE, 0.0);
-        Assert.assertEquals(1, Statistics.getStats().get(DATASIZE));
+        Assert.assertEquals(0L, Statistics.getStats().get(DATASIZE));
+        AtmosphericInfoHolder.getAtmosphericInformation(IATA_CODE, 0);
+        DataPoint _dp = new DataPoint.Builder()
+                .withCount(10).withFirst(10).withMedian(20).withLast(30).withMean(22).build();
+        RestWeatherCollectorEndpoint _update = new RestWeatherCollectorEndpoint();
+        _update.updateWeather(IATA_CODE, "wind", _gson.toJson(_dp));
+        RestWeatherQueryEndpoint _query = new RestWeatherQueryEndpoint();
+        _query.weather(IATA_CODE, "0").getEntity();
+        Assert.assertEquals(1L, Statistics.getStats().get(DATASIZE));
 
     }
 
