@@ -10,20 +10,20 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 public class DataPoint {
 
-    public double mean = 0.0;
+    private double mean = 0.0;
 
-    public int first = 0;
+    private int first = 0;
 
-    public int second = 0;
+    private int second = 0;
 
-    public int third = 0;
+    private int third = 0;
 
-    public int count = 0;
+    private int count = 0;
 
     /** private constructor, use the builder to create this object */
     private DataPoint() { }
 
-    protected DataPoint(int first, int second, int mean, int third, int count) {
+    private DataPoint(int first, int second, int mean, int third, int count) {
         this.setFirst(first);
         this.setMean(mean);
         this.setSecond(second);
@@ -36,14 +36,14 @@ public class DataPoint {
         return mean;
     }
 
-    protected void setMean(double mean) { this.mean = mean; }
+    public void setMean(double mean) { this.mean = mean; }
 
     /** 1st quartile -- useful as a lower bound */
     public int getFirst() {
         return first;
     }
 
-    protected void setFirst(int first) {
+    public void setFirst(int first) {
         this.first = first;
     }
 
@@ -52,7 +52,7 @@ public class DataPoint {
         return second;
     }
 
-    protected void setSecond(int second) {
+    public void setSecond(int second) {
         this.second = second;
     }
 
@@ -61,7 +61,7 @@ public class DataPoint {
         return third;
     }
 
-    protected void setThird(int third) {
+    public void setThird(int third) {
         this.third = third;
     }
 
@@ -70,7 +70,7 @@ public class DataPoint {
         return count;
     }
 
-    protected void setCount(int count) {
+    public void setCount(int count) {
         this.count = count;
     }
 
@@ -78,41 +78,52 @@ public class DataPoint {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.NO_CLASS_NAME_STYLE);
     }
 
-    public boolean equals(Object that) {
-        return this.toString().equals(that.toString());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DataPoint dataPoint = (DataPoint) o;
+
+        if (Double.compare(dataPoint.mean, mean) != 0) return false;
+        if (first != dataPoint.first) return false;
+        if (second != dataPoint.second) return false;
+        if (third != dataPoint.third) return false;
+        return count == dataPoint.count;
+
     }
 
     static public class Builder {
-        int first;
-        int mean;
-        int median;
-        int last;
-        int count;
+        private int first;
+        private int mean;
+        private int median;
+        private int last;
+        private int count;
 
         public Builder() { }
 
         public Builder withFirst(int first) {
-            first= first;
+            this.first= first;
             return this;
         }
 
         public Builder withMean(int mean) {
-            mean = mean;
+            this.mean = mean;
             return this;
         }
 
         public Builder withMedian(int median) {
-            median = median;
+            this.median = median;
             return this;
         }
 
         public Builder withCount(int count) {
-            count = count;
+            this.count = count;
             return this;
         }
 
         public Builder withLast(int last) {
-            last = last;
+            this.last = last;
             return this;
         }
 

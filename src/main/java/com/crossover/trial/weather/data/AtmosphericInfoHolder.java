@@ -6,9 +6,11 @@ import com.crossover.trial.weather.DataPoint;
 import com.crossover.trial.weather.DataPointType;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
 import com.crossover.trial.weather.exceptions.AirportNotFoundException;
-import com.crossover.trial.weather.exceptions.WeatherException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -68,14 +70,15 @@ public class AtmosphericInfoHolder {
 
         List<AtmosphericInformation> retval;
         if (radius == 0) {
-            retval = new ArrayList<>();
-            retval.add(atmosphericInformation.get(foundAirport));
+            retval = Collections.singletonList(atmosphericInformation.get(foundAirport));
         } else {
-            retval = atmosphericInformation.entrySet().stream()
-                    .filter(entry ->
-                            (calculateDistance(foundAirport, entry.getKey()) <= radius) && !entry.getValue().isEmpty())
-                    .map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
+            retval = Collections.unmodifiableList(
+                    atmosphericInformation.entrySet().stream()
+                            .filter(entry ->
+                                    (calculateDistance(foundAirport, entry.getKey()) <= radius)
+                                            && !entry.getValue().isEmpty())
+                            .map(Map.Entry::getValue)
+                            .collect(Collectors.toList()));
         }
         return retval;
     }
@@ -86,24 +89,24 @@ public class AtmosphericInfoHolder {
      * @param iataCode  the 3 letter IATA code
      * @param pointType the point type {@link DataPointType}
      * @param dp        a datapoint object holding pointType data
-     * @throws WeatherException if the update can not be completed
+     * @throws AirportNotFoundException if the airport with such iata code can not be found
      */
     public static void addDataPoint(String iataCode, String pointType, DataPoint dp) throws AirportNotFoundException {
         AirportData airportData = findAirportData(iataCode);
-        AtmosphericInformation ai = atmosphericInformation.get(airportData);
-        updateAtmosphericInformation(ai, pointType, dp);
+        atmosphericInformation.put(airportData, createAtmosphericInformation(pointType, dp));
     }
 
     /**
-     * update atmospheric information with the given data point for the given point type
+     * Create atmospheric information with the given data point for the given point type
      *
-     * @param ai        the atmospheric information object to update
      * @param pointType the data point type as a string
      * @param dp        the actual data point
      * @throws IllegalArgumentException if the DataPointType does not exist
      */
-    private static void updateAtmosphericInformation(AtmosphericInformation ai, String pointType, DataPoint dp) {
+    private static AtmosphericInformation createAtmosphericInformation(String pointType, DataPoint dp) {
         final DataPointType dptype = DataPointType.valueOf(pointType.toUpperCase());
+        AtmosphericInformation ai = new AtmosphericInformation();
+        ai.setLastUpdateTime(System.currentTimeMillis());
         switch (dptype) {
             case WIND:
                 if (dp.getMean() >= 0) {
@@ -136,7 +139,7 @@ public class AtmosphericInfoHolder {
                 }
                 break;
         }
-        ai.setLastUpdateTime(System.currentTimeMillis());
+        return ai;
     }
 
     /**

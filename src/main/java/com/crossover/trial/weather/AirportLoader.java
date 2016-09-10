@@ -6,6 +6,7 @@ import com.crossover.trial.weather.loader.Parser;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,11 +60,12 @@ public class AirportLoader {
             while ((l = reader.readLine()) != null) {
                 try {
                     AirportData airportData = Parser.parse(l);
-                    collect.path(AIRPORT_URI)
+                    Response response = collect.path(AIRPORT_URI)
                             .path(airportData.getIata())
                             .path(Double.toString(airportData.getLatitude()))
                             .path(Double.toString(airportData.getLongitude()))
                             .request().method(POST);
+                    System.out.println(response);
                 } catch (ParseException | NumberFormatException e) {
                     e.printStackTrace();
                 }
