@@ -1,6 +1,7 @@
 package com.crossover.trial.weather;
 
 import com.crossover.trial.weather.data.AtmosphericInfoHolder;
+import com.crossover.trial.weather.exceptions.AirportAdditionException;
 import com.crossover.trial.weather.rest.RestWeatherCollectorEndpoint;
 import com.crossover.trial.weather.rest.RestWeatherQueryEndpoint;
 import com.crossover.trial.weather.rest.WeatherCollectorEndpoint;
@@ -8,11 +9,13 @@ import com.crossover.trial.weather.rest.WeatherQueryEndpoint;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
+import static com.crossover.trial.weather.data.AtmosphericInfoHolder.addAirport;
 import static org.junit.Assert.assertEquals;
 
 public class WeatherEndpointTest {
@@ -24,13 +27,28 @@ public class WeatherEndpointTest {
     private Gson _gson = new Gson();
 
     private DataPoint _dp;
+
     @Before
     public void setUp() throws Exception {
-        AtmosphericInfoHolder.init();
+//        AtmosphericInfoHolder.init();
+        try {
+            addAirport("BOS", 42.364347, -71.005181);
+            addAirport("EWR", 40.6925, -74.168667);
+            addAirport("JFK", 40.639751, -73.778925);
+            addAirport("LGA", 40.777245, -73.872608);
+            addAirport("MMU", 40.79935, -74.4148747);
+        } catch (AirportAdditionException e) {
+            e.printStackTrace(); // TODO: 09.09.2016
+        }
         _dp = new DataPoint.Builder()
                 .withCount(10).withFirst(10).withMedian(20).withLast(30).withMean(22).build();
         _update.updateWeather("BOS", "wind", _gson.toJson(_dp));
         _query.weather("BOS", "0").getEntity();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        AtmosphericInfoHolder.clear();
     }
 
     @Test
@@ -80,5 +98,4 @@ public class WeatherEndpointTest {
         assertEquals(ais.get(0).getWind(), windDp);
         assertEquals(ais.get(0).getCloudCover(), cloudCoverDp);
     }
-
 }

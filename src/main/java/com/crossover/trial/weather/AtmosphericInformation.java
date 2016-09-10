@@ -44,7 +44,7 @@ public class AtmosphericInformation {
 
     }
 
-    protected AtmosphericInformation(DataPoint temperature, DataPoint wind, DataPoint humidity, DataPoint percipitation, DataPoint pressure, DataPoint cloudCover) {
+    public AtmosphericInformation(DataPoint temperature, DataPoint wind, DataPoint humidity, DataPoint percipitation, DataPoint pressure, DataPoint cloudCover) {
         this.temperature = temperature;
         this.wind = wind;
         this.humidity = humidity;
@@ -52,6 +52,51 @@ public class AtmosphericInformation {
         this.pressure = pressure;
         this.cloudCover = cloudCover;
         this.lastUpdateTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Create atmospheric information with the given data point for the given point type
+     *
+     * @param pointType the data point type as a string
+     * @param dp        the actual data point
+     * @throws IllegalArgumentException if the DataPointType does not exist
+     */
+    public AtmosphericInformation updateAtmosphericInformation(String pointType, DataPoint dp) {
+        final DataPointType dptype = DataPointType.valueOf(pointType.toUpperCase());
+        this.setLastUpdateTime(System.currentTimeMillis());
+        switch (dptype) {
+            case WIND:
+                if (dp.getMean() >= 0) {
+                    this.setWind(dp);
+                }
+                break;
+            case TEMPERATURE:
+                if (dp.getMean() >= -50 && dp.getMean() < 100) {
+                    this.setTemperature(dp);
+                }
+                break;
+            case HUMIDTY:
+                if (dp.getMean() >= 0 && dp.getMean() < 100) {
+                    this.setHumidity(dp);
+                }
+                break;
+            case PRESSURE:
+                if (dp.getMean() >= 650 && dp.getMean() < 800) {
+                    this.setPressure(dp);
+                }
+                break;
+            case CLOUDCOVER:
+                if (dp.getMean() >= 0 && dp.getMean() < 100) {
+                    this.setCloudCover(dp);
+                }
+                break;
+            case PRECIPITATION:
+                if (dp.getMean() >= 0 && dp.getMean() < 100) {
+                    this.setPrecipitation(dp);
+                }
+                break;
+        }
+        return this;
     }
 
     public boolean isEmpty() {

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import static com.crossover.trial.weather.data.MathUtils.calculateDistance;
@@ -21,11 +22,11 @@ import static com.crossover.trial.weather.data.MathUtils.calculateDistance;
  */
 public class AtmosphericInfoHolder {
 
-    private static Map<AirportData, AtmosphericInformation> atmosphericInformation =
+    private static ConcurrentMap<AirportData, AtmosphericInformation> atmosphericInformation =
             new ConcurrentHashMap<>();
 
     static {
-        init();
+//        init();
     }
 
     /**
@@ -91,55 +92,11 @@ public class AtmosphericInfoHolder {
      * @param dp        a datapoint object holding pointType data
      * @throws AirportNotFoundException if the airport with such iata code can not be found
      */
-    public static void addDataPoint(String iataCode, String pointType, DataPoint dp) throws AirportNotFoundException {
+    public static void addDataPoint(String iataCode, String pointType, DataPoint dp)
+            throws AirportNotFoundException {
         AirportData airportData = findAirportData(iataCode);
-        atmosphericInformation.put(airportData, createAtmosphericInformation(pointType, dp));
-    }
-
-    /**
-     * Create atmospheric information with the given data point for the given point type
-     *
-     * @param pointType the data point type as a string
-     * @param dp        the actual data point
-     * @throws IllegalArgumentException if the DataPointType does not exist
-     */
-    private static AtmosphericInformation createAtmosphericInformation(String pointType, DataPoint dp) {
-        final DataPointType dptype = DataPointType.valueOf(pointType.toUpperCase());
-        AtmosphericInformation ai = new AtmosphericInformation();
-        ai.setLastUpdateTime(System.currentTimeMillis());
-        switch (dptype) {
-            case WIND:
-                if (dp.getMean() >= 0) {
-                    ai.setWind(dp);
-                }
-                break;
-            case TEMPERATURE:
-                if (dp.getMean() >= -50 && dp.getMean() < 100) {
-                    ai.setTemperature(dp);
-                }
-                break;
-            case HUMIDTY:
-                if (dp.getMean() >= 0 && dp.getMean() < 100) {
-                    ai.setHumidity(dp);
-                }
-                break;
-            case PRESSURE:
-                if (dp.getMean() >= 650 && dp.getMean() < 800) {
-                    ai.setPressure(dp);
-                }
-                break;
-            case CLOUDCOVER:
-                if (dp.getMean() >= 0 && dp.getMean() < 100) {
-                    ai.setCloudCover(dp);
-                }
-                break;
-            case PRECIPITATION:
-                if (dp.getMean() >= 0 && dp.getMean() < 100) {
-                    ai.setPrecipitation(dp);
-                }
-                break;
-        }
-        return ai;
+        atmosphericInformation.compute(airportData,
+                (airport, ai) -> ai.updateAtmosphericInformation(pointType, dp));
     }
 
     /**
@@ -172,5 +129,10 @@ public class AtmosphericInfoHolder {
     public static void removeAirport(String iata) throws AirportNotFoundException {
         AirportData airportData = findAirportData(iata);
         atmosphericInformation.remove(airportData);
+    }
+
+    public static void clear() {
+        atmosphericInformation.clear();
+        Statistics.clear();
     }
 }
