@@ -43,6 +43,8 @@ public class AirportLoader {
     }
 
     public static void main(String args[]) throws IOException {
+        if (args.length != 1) System.err.println("Please specify a valid input");
+
         File airportDataFile = new File(args[0]);
         if (!airportDataFile.exists() || airportDataFile.length() == 0) {
             System.err.println(airportDataFile + " is not a valid input");
