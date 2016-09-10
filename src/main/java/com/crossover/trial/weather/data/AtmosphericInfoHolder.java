@@ -18,6 +18,8 @@ public class AtmosphericInfoHolder {
     private static Map<AirportData, AtmosphericInformation> atmosphericInformation =
             new ConcurrentHashMap<>();
 
+//    private static List<AirportData> airports = new CopyOnWriteArrayList<>();
+
     static {
         init();
     }

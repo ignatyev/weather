@@ -34,7 +34,7 @@ public class WeatherEndpointTest {
         String ping = _query.ping();
         JsonElement pingResult = new JsonParser().parse(ping);
         assertEquals(1, pingResult.getAsJsonObject().get("datasize").getAsInt());
-        assertEquals(1, pingResult.getAsJsonObject().get("iata_freq").getAsJsonObject().entrySet().size());
+        assertEquals(5, pingResult.getAsJsonObject().get("iata_freq").getAsJsonObject().entrySet().size());
     }
 
     @Test

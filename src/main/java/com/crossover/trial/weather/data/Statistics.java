@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.crossover.trial.weather.data.AtmosphericInfoHolder.findAirportData;
+import static com.crossover.trial.weather.data.AtmosphericInfoHolder.getAirports;
 
 /**
  * Created by AnVIgnatev on 09.09.2016.
@@ -37,9 +38,9 @@ public class Statistics {
      */
     public static void updateRequestFrequency(String iata, Double radius) {
         AirportData airportData = findAirportData(iata);
-        airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(1));
+        airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(0));
         airportRequestCounts.get(airportData).incrementAndGet();
-        radiusRequestCounts.putIfAbsent(radius, new AtomicInteger(1));
+        radiusRequestCounts.putIfAbsent(radius, new AtomicInteger(0));
         radiusRequestCounts.get(radius).incrementAndGet();
     }
 
@@ -75,10 +76,13 @@ public class Statistics {
 
 //TODO        airportRequestCounts.entrySet().stream().collect(Collectors.)
         // fraction of queries
-        for (AirportData data : airportRequestCounts.keySet()) {
-            double airportReqCount = airportRequestCounts.get(data).get();
+        for (AirportData airportData : getAirports()) {
+            AtomicInteger airportRequests = airportRequestCounts.get(airportData);
+            double airportReqCount;
+            if (airportRequests == null) airportReqCount = 0;
+            else airportReqCount = airportRequests.get();
             double frac = airportReqCount / totalRequests;
-            freq.put(data.getIata(), frac);
+            freq.put(airportData.getIata(), frac);
         }
         return freq;
     }
