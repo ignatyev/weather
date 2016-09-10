@@ -38,7 +38,7 @@ public class WeatherEndpointTest {
             addAirport("LGA", 40.777245, -73.872608);
             addAirport("MMU", 40.79935, -74.4148747);
         } catch (AirportAdditionException e) {
-            e.printStackTrace(); // TODO: 09.09.2016
+            e.printStackTrace();
         }
         _dp = new DataPoint.Builder()
                 .withCount(10).withFirst(10).withMedian(20).withLast(30).withMean(22).build();

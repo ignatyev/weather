@@ -26,13 +26,12 @@ public class Statistics {
      * performance metrics
      */
     private static final Map<AirportData, AtomicInteger> airportRequestCounts = new ConcurrentHashMap<>();
-    /**
-     * TODO add doc
-     */
+
     private static final Map<Double, AtomicInteger> radiusRequestCounts = new ConcurrentHashMap<>();
-    public static final String DATASIZE = "datasize";
-    public static final String IATA_FREQ = "iata_freq";
-    public static final String RADIUS_FREQ = "radius_freq";
+
+    static final String DATASIZE = "datasize";
+    static final String IATA_FREQ = "iata_freq";
+    static final String RADIUS_FREQ = "radius_freq";
 
     /**
      * Records information about how often requests are made
@@ -77,7 +76,6 @@ public class Statistics {
         Map<String, Double> freq = new HashMap<>();
         double totalRequests = airportRequestCounts.values().stream().mapToInt(AtomicInteger::get).sum();
         if (totalRequests == 0) return freq;
-//TODO        airportRequestCounts.entrySet().stream().collect(Collectors.)
         // fraction of queries
         for (AirportData airportData : getAirports()) {
             AtomicInteger airportRequests = airportRequestCounts.get(airportData);
@@ -96,12 +94,11 @@ public class Statistics {
 
     private static long getDatasize() {
         return AtmosphericInfoHolder.getAtmosphericInformation().stream()
-                .filter((ai) -> !ai.isEmpty() && ai.getLastUpdateTime() > System.currentTimeMillis() - DAY_IN_MILLIS)
-                // TODO: 09.09.2016 refactor date
+                .filter(ai ->
+                        !ai.isEmpty() && ai.getLastUpdateTime() > System.currentTimeMillis() - DAY_IN_MILLIS)
                 .count();
     }
 
-    //TODO remove
     static void clear() {
         airportRequestCounts.clear();
         radiusRequestCounts.clear();
