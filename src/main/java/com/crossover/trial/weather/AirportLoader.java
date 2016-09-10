@@ -1,14 +1,18 @@
 package com.crossover.trial.weather;
 
-import com.crossover.trial.weather.data.AtmosphericInfoHolder;
-import com.crossover.trial.weather.exceptions.AirportAdditionException;
 import com.crossover.trial.weather.exceptions.ParseException;
 import com.crossover.trial.weather.loader.Parser;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import java.io.*;
+import javax.ws.rs.core.Response;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * A simple airport loader which reads a file from disk and sends entries to the webservice
@@ -18,6 +22,8 @@ import java.io.*;
  */
 public class AirportLoader {
 
+    private static final String BASE_URI = "http://localhost:9090/";
+    public static final String AIRPORT_URI = "airport";
     /**
      * end point for read queries
      */
@@ -30,8 +36,8 @@ public class AirportLoader {
 
     public AirportLoader() {
         Client client = ClientBuilder.newClient();
-        query = client.target("http://localhost:8080/query");
-        collect = client.target("http://localhost:8080/collect");
+        query = client.target(BASE_URI + "query");
+        collect = client.target(BASE_URI + "collect");
     }
 
     public static void main(String args[]) throws IOException {
@@ -52,9 +58,16 @@ public class AirportLoader {
             while ((l = reader.readLine()) != null) {
                 try {
                     AirportData airportData = Parser.parse(l);
-                    AtmosphericInfoHolder.addAirport(airportData.getIata(), airportData.getLatitude(),
+                    /*AtmosphericInfoHolder.addAirport(airportData.getIata(), airportData.getLatitude(),
                             airportData.getLongitude());
-                } catch (AirportAdditionException | ParseException | NumberFormatException e) {
+                    */
+                    Response response = collect.path(AIRPORT_URI)
+                            .path(airportData.getIata())
+                            .path(Double.toString(airportData.getLatitude()))
+                            .path(Double.toString(airportData.getLongitude()))
+                            .request().post(null);
+                    System.out.println(response);
+                } catch (ParseException | NumberFormatException e) {
                     e.printStackTrace();
                 }
             }
