@@ -2,13 +2,13 @@ package com.crossover.trial.weather;
 
 import com.crossover.trial.weather.data.AtmosphericInfoHolder;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
+import com.crossover.trial.weather.exceptions.ParseException;
 import com.crossover.trial.weather.loader.Parser;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import java.io.*;
-import java.text.ParseException;
 
 /**
  * A simple airport loader which reads a file from disk and sends entries to the webservice
