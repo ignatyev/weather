@@ -1,8 +1,12 @@
 package com.crossover.trial.weather.data;
 
-import com.crossover.trial.weather.*;
+import com.crossover.trial.weather.AirportData;
+import com.crossover.trial.weather.AtmosphericInformation;
+import com.crossover.trial.weather.DataPoint;
+import com.crossover.trial.weather.DataPointType;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
 import com.crossover.trial.weather.exceptions.AirportNotFoundException;
+import com.crossover.trial.weather.exceptions.WeatherException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,10 +89,10 @@ public class AtmosphericInfoHolder {
      * @param dp        a datapoint object holding pointType data
      * @throws WeatherException if the update can not be completed
      */
-    public static void addDataPoint(String iataCode, String pointType, DataPoint dp) throws WeatherException {
+    public static void addDataPoint(String iataCode, String pointType, DataPoint dp) throws AirportNotFoundException {
         AirportData airportData = findAirportData(iataCode);
         if (airportData == null) {
-            throw new WeatherException(String.format("Airport %s was not found", iataCode));
+            throw new AirportNotFoundException(String.format("Airport %s was not found", iataCode));
         }
         AtmosphericInformation ai = atmosphericInformation.get(airportData);
         updateAtmosphericInformation(ai, pointType, dp);
@@ -100,9 +104,9 @@ public class AtmosphericInfoHolder {
      * @param ai        the atmospheric information object to update
      * @param pointType the data point type as a string
      * @param dp        the actual data point
+     * @throws IllegalArgumentException if the DataPointType does not exist
      */
-    private static void updateAtmosphericInformation(AtmosphericInformation ai, String pointType, DataPoint dp)
-            throws WeatherException {
+    private static void updateAtmosphericInformation(AtmosphericInformation ai, String pointType, DataPoint dp) {
         final DataPointType dptype = DataPointType.valueOf(pointType.toUpperCase());
         switch (dptype) {
             case WIND:
@@ -135,8 +139,6 @@ public class AtmosphericInfoHolder {
                     ai.setPrecipitation(dp);
                 }
                 break;
-            default:
-                throw new WeatherException("couldn't update atmospheric data");
         }
         ai.setLastUpdateTime(System.currentTimeMillis());
     }

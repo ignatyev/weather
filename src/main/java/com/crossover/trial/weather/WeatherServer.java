@@ -1,9 +1,12 @@
 package com.crossover.trial.weather;
 
+import com.crossover.trial.weather.rest.RestWeatherCollectorEndpoint;
+import com.crossover.trial.weather.rest.RestWeatherQueryEndpoint;
 import org.glassfish.grizzly.Connection;
-import org.glassfish.grizzly.http.server.*;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.HttpServerFilter;
+import org.glassfish.grizzly.http.server.HttpServerProbe;
+import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -12,7 +15,7 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 
 /**

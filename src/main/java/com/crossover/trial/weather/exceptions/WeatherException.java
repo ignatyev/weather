@@ -1,4 +1,4 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.exceptions;
 
 /**
  * An internal exception marker

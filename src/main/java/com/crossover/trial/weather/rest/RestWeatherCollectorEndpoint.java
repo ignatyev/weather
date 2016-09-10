@@ -1,7 +1,10 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.rest;
 
+import com.crossover.trial.weather.AirportData;
+import com.crossover.trial.weather.DataPoint;
 import com.crossover.trial.weather.data.AtmosphericInfoHolder;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
+import com.crossover.trial.weather.exceptions.WeatherException;
 import com.google.gson.Gson;
 
 import javax.ws.rs.Path;
@@ -21,10 +24,10 @@ import java.util.stream.Collectors;
 
 @Path("/collect")
 public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
-    public final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
 
     /** shared gson json to object factory */
-    public final static Gson gson = new Gson();
+    private final static Gson gson = new Gson();
 
     @Override
     public Response ping() {

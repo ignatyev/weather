@@ -79,8 +79,11 @@ public class Statistics {
         for (AirportData airportData : getAirports()) {
             AtomicInteger airportRequests = airportRequestCounts.get(airportData);
             double airportReqCount;
-            if (airportRequests == null) airportReqCount = 0;
-            else airportReqCount = airportRequests.get();
+            if (airportRequests == null) {
+                airportReqCount = 0;
+            } else {
+                airportReqCount = airportRequests.get();
+            }
             double frac = airportReqCount / totalRequests;
             freq.put(airportData.getIata(), frac);
         }

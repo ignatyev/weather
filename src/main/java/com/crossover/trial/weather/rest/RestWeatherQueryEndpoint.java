@@ -1,5 +1,6 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.rest;
 
+import com.crossover.trial.weather.AtmosphericInformation;
 import com.crossover.trial.weather.data.Statistics;
 import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 import com.google.gson.Gson;
@@ -22,10 +23,10 @@ import static com.crossover.trial.weather.data.Statistics.updateRequestFrequency
 @Path("/query")
 public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 
-    public final static Logger LOGGER = Logger.getLogger("WeatherQuery");
+    private final static Logger LOGGER = Logger.getLogger("WeatherQuery");
 
     /** shared gson json to object factory */
-    public static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     /**
      * Retrieve service health including total size of valid data points and request frequency information.
