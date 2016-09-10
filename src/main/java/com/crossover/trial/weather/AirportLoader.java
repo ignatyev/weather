@@ -24,7 +24,7 @@ import static javax.ws.rs.HttpMethod.POST;
 public class AirportLoader {
 
     private static final String BASE_URI = "http://localhost:9090/";
-    public static final String AIRPORT_URI = "airport";
+    private static final String AIRPORT_URI = "airport";
     /**
      * end point for read queries
      */

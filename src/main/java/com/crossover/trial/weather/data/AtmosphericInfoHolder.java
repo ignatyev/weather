@@ -165,4 +165,9 @@ public class AtmosphericInfoHolder {
     public static Collection<AirportData> getAirports() {
         return Collections.unmodifiableCollection(atmosphericInformation.keySet());
     }
+
+    public static void removeAirport(String iata) throws AirportNotFoundException {
+        AirportData airportData = findAirportData(iata);
+        atmosphericInformation.remove(airportData);
+    }
 }

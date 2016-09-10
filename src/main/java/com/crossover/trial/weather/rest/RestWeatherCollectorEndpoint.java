@@ -88,7 +88,13 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     @Override
     public Response deleteAirport(String iata) {
-        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+        try {
+            AtmosphericInfoHolder.removeAirport(iata);
+        } catch (AirportNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Error while deleting airport " + iata, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        return Response.status(Response.Status.OK).build();
     }
 
     @Override
