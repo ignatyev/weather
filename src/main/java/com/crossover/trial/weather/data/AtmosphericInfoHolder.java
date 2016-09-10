@@ -22,8 +22,6 @@ public class AtmosphericInfoHolder {
     private static Map<AirportData, AtmosphericInformation> atmosphericInformation =
             new ConcurrentHashMap<>();
 
-//    private static List<AirportData> airports = new CopyOnWriteArrayList<>();
-
     static {
         init();
     }
@@ -74,7 +72,8 @@ public class AtmosphericInfoHolder {
             retval.add(atmosphericInformation.get(foundAirport));
         } else {
             retval = atmosphericInformation.entrySet().stream()
-                    .filter(entry -> (calculateDistance(foundAirport, entry.getKey()) <= radius) && !entry.getValue().isEmpty())
+                    .filter(entry ->
+                            (calculateDistance(foundAirport, entry.getKey()) <= radius) && !entry.getValue().isEmpty())
                     .map(Map.Entry::getValue)
                     .collect(Collectors.toList());
         }
