@@ -5,7 +5,8 @@ package com.crossover.trial.weather.exceptions;
  */
 public class AirportNotFoundException extends WeatherException {
 
-    public AirportNotFoundException(String message) {
-        super(message);
+    public AirportNotFoundException(String s) {
+        super(String.format("Airport %s not found", s));
     }
+
 }

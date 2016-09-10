@@ -1,6 +1,7 @@
 package com.crossover.trial.weather.data;
 
 import com.crossover.trial.weather.AirportData;
+import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class Statistics {
      * @param iata   an iata code
      * @param radius query radius
      */
-    public static void updateRequestFrequency(String iata, Double radius) {
+    public static void updateRequestFrequency(String iata, Double radius) throws AirportNotFoundException {
         AirportData airportData = findAirportData(iata);
         airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(0));
         airportRequestCounts.get(airportData).incrementAndGet();

@@ -55,18 +55,18 @@ public class AtmosphericInfoHolder {
      * Given an iataCode find the airport data
      *
      * @param iataCode as a string
-     * @return airport data or null if not found
+     * @return airport data
+     * @throws AirportNotFoundException if the airport data is not found
      */
-    public static AirportData findAirportData(String iataCode) {
+    public static AirportData findAirportData(String iataCode) throws AirportNotFoundException {
         return atmosphericInformation.keySet().stream()
                 .filter(airport -> airport.getIata().equals(iataCode))
-                .findFirst().orElse(null);
+                .findFirst().orElseThrow(() -> new AirportNotFoundException(iataCode));
     }
 
     public static List<AtmosphericInformation> getAtmosphericInformation(String iata, double radius)
             throws AirportNotFoundException {
         AirportData foundAirport = findAirportData(iata);
-        if (foundAirport == null) throw new AirportNotFoundException("Airport not found: " + iata);
 
         List<AtmosphericInformation> retval;
         if (radius == 0) {
@@ -91,9 +91,6 @@ public class AtmosphericInfoHolder {
      */
     public static void addDataPoint(String iataCode, String pointType, DataPoint dp) throws AirportNotFoundException {
         AirportData airportData = findAirportData(iataCode);
-        if (airportData == null) {
-            throw new AirportNotFoundException(String.format("Airport %s was not found", iataCode));
-        }
         AtmosphericInformation ai = atmosphericInformation.get(airportData);
         updateAtmosphericInformation(ai, pointType, dp);
     }

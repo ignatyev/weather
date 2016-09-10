@@ -4,8 +4,10 @@ import com.crossover.trial.weather.AirportData;
 import com.crossover.trial.weather.DataPoint;
 import com.crossover.trial.weather.data.AtmosphericInfoHolder;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
+import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 import com.crossover.trial.weather.exceptions.WeatherException;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -26,7 +28,9 @@ import java.util.stream.Collectors;
 public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
     private final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
 
-    /** shared gson json to object factory */
+    /**
+     * shared gson json to object factory
+     */
     private final static Gson gson = new Gson();
 
     @Override
@@ -58,7 +62,12 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     @Override
     public Response getAirport(@PathParam("iata") String iata) {
-        AirportData ad = AtmosphericInfoHolder.findAirportData(iata);
+        AirportData ad = null;
+        try {
+            ad = AtmosphericInfoHolder.findAirportData(iata);
+        } catch (AirportNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Could not find airport " + iata, e);
+        }
         return Response.status(Response.Status.OK).entity(ad).build();
     }
 
@@ -68,7 +77,8 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
                                @PathParam("lat") String latString,
                                @PathParam("long") String longString) {
         try {
-            AtmosphericInfoHolder.addAirport(iata, Double.valueOf(latString), Double.valueOf(longString));
+            if (StringUtils.isEmpty(iata)) throw new AirportAdditionException("iata can not be empty");
+            AtmosphericInfoHolder.addAirport(iata.toUpperCase(), Double.valueOf(latString), Double.valueOf(longString));
         } catch (AirportAdditionException e) {
             LOGGER.log(Level.SEVERE, "Error while adding an airport", e);
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

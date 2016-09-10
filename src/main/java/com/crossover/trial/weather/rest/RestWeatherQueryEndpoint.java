@@ -25,7 +25,9 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 
     private final static Logger LOGGER = Logger.getLogger("WeatherQuery");
 
-    /** shared gson json to object factory */
+    /**
+     * shared gson json to object factory
+     */
     private static final Gson gson = new Gson();
 
     private static final String MINUS = "-";
@@ -44,19 +46,18 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      * Given a query in json format {'iata': CODE, 'radius': km} extracts the requested airport information and
      * return a list of matching atmosphere information.
      *
-     * @param iata the iataCode
+     * @param iata         the iataCode
      * @param radiusString the radius in km, negative values are mapped to 0
-     *
      * @return a list of atmospheric information
      */
     @Override
     public Response weather(String iata, String radiusString) {
         double radius = radiusString == null || radiusString.trim().isEmpty() || radiusString.startsWith(MINUS) ?
                 0 : Double.valueOf(radiusString);
-        updateRequestFrequency(iata, radius);
 
         List<AtmosphericInformation> retval;
         try {
+            updateRequestFrequency(iata, radius);
             retval = getAtmosphericInformation(iata, radius);
         } catch (AirportNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Error while requesting weather", e);
