@@ -1,14 +1,14 @@
 package com.crossover.trial.weather.data;
 
 import com.crossover.trial.weather.AirportData;
-import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import static com.crossover.trial.weather.data.AtmosphericInfoHolder.findAirportData;
 import static com.crossover.trial.weather.data.AtmosphericInfoHolder.getAirports;
 
 /**
@@ -25,9 +25,9 @@ public class Statistics {
      * we don't want to write this to disk, but will pull it off using a REST request and aggregate with other
      * performance metrics
      */
-    private static final Map<AirportData, AtomicInteger> airportRequestCounts = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, AtomicInteger> airportRequestCounts = new ConcurrentHashMap<>();
 
-    private static final Map<Double, AtomicInteger> radiusRequestCounts = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Double, AtomicInteger> radiusRequestCounts = new ConcurrentHashMap<>();
 
     static final String DATASIZE = "datasize";
     static final String IATA_FREQ = "iata_freq";
@@ -39,10 +39,9 @@ public class Statistics {
      * @param iata   an iata code
      * @param radius query radius
      */
-    public static void updateRequestFrequency(String iata, Double radius) throws AirportNotFoundException {
-        AirportData airportData = findAirportData(iata);
-        airportRequestCounts.putIfAbsent(airportData, new AtomicInteger(0));
-        airportRequestCounts.get(airportData).incrementAndGet();
+    public static void updateRequestFrequency(String iata, Double radius) {
+        airportRequestCounts.putIfAbsent(iata, new AtomicInteger(0));
+        airportRequestCounts.get(iata).incrementAndGet();
         radiusRequestCounts.putIfAbsent(radius, new AtomicInteger(0));
         radiusRequestCounts.get(radius).incrementAndGet();
     }
@@ -58,7 +57,7 @@ public class Statistics {
     }
 
     private static int[] getRadiusesHistogram() {
-        int maxRadius = radiusRequestCounts.keySet().stream()
+        int maxRadius = radiusRequestCounts.keySet().parallelStream()
                 .max(Double::compare)
                 .orElse(1000.0).intValue() + 1;
 
@@ -66,36 +65,25 @@ public class Statistics {
         for (Map.Entry<Double, AtomicInteger> e : radiusRequestCounts.entrySet()) {
             Double radius = e.getKey();
             if (radius == null || radius < 0) continue;
-            int i = radius.intValue() % 10;
+            int i = radius.intValue() % 10; //TODO clarify what's happening here
             hist[i] += e.getValue().get();
         }
         return hist;
     }
 
     private static Map<String, Double> getAirportFrequenciesMap() {
-        Map<String, Double> freq = new HashMap<>();
-        double totalRequests = airportRequestCounts.values().stream().mapToInt(AtomicInteger::get).sum();
-        if (totalRequests == 0) return freq;
+        int totalRequests = airportRequestCounts.values().parallelStream().mapToInt(AtomicInteger::get).sum();
+        if (totalRequests == 0) return new HashMap<>();
         // fraction of queries
-        for (AirportData airportData : getAirports()) {
-            AtomicInteger airportRequests = airportRequestCounts.get(airportData);
-            double airportReqCount;
-            if (airportRequests == null) {
-                airportReqCount = 0;
-            } else {
-                airportReqCount = airportRequests.get();
-            }
-            double frac = airportReqCount / totalRequests;
-            freq.put(airportData.getIata(), frac);
-        }
-        return freq;
-
+        return getAirports().parallelStream()
+                .collect(Collectors.toMap(AirportData::getIata, airportData ->
+                        (double)airportRequestCounts
+                                .getOrDefault(airportData.getIata(), new AtomicInteger(0)).get()/totalRequests));
     }
 
     private static long getDatasize() {
-        return AtmosphericInfoHolder.getAtmosphericInformation().stream()
-                .filter(ai ->
-                        !ai.isEmpty() && ai.getLastUpdateTime() > System.currentTimeMillis() - DAY_IN_MILLIS)
+        return AtmosphericInfoHolder.getAtmosphericInformation().parallelStream()
+                .filter(ai -> !ai.isEmpty() && ai.getLastUpdateTime() > System.currentTimeMillis() - DAY_IN_MILLIS)
                 .count();
     }
 

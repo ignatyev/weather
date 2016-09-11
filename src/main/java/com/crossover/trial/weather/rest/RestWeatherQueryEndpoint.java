@@ -4,6 +4,7 @@ import com.crossover.trial.weather.AtmosphericInformation;
 import com.crossover.trial.weather.data.Statistics;
 import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -52,9 +53,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      */
     @Override
     public Response weather(String iata, String radiusString) {
-        double radius = radiusString == null || radiusString.trim().isEmpty() || radiusString.startsWith(MINUS) ?
-                0 : Double.valueOf(radiusString);
-
+        double radius = StringUtils.isEmpty(radiusString) ? 0 : Double.valueOf(radiusString);
         List<AtmosphericInformation> retval;
         try {
             updateRequestFrequency(iata, radius);

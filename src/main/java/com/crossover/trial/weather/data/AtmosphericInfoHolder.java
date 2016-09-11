@@ -56,7 +56,7 @@ public class AtmosphericInfoHolder {
      * @throws AirportNotFoundException if the airport data is not found
      */
     public static AirportData findAirportData(String iataCode) throws AirportNotFoundException {
-        return atmosphericInformation.keySet().stream()
+        return atmosphericInformation.keySet().parallelStream()
                 .filter(airport -> airport.getIata().equals(iataCode))
                 .findFirst().orElseThrow(() -> new AirportNotFoundException(iataCode));
     }
@@ -70,10 +70,9 @@ public class AtmosphericInfoHolder {
             retval = Collections.singletonList(atmosphericInformation.get(foundAirport));
         } else {
             retval = Collections.unmodifiableList(
-                    atmosphericInformation.entrySet().stream()
+                    atmosphericInformation.entrySet().parallelStream()
                             .filter(entry ->
-                                    (Double.compare(
-                                            calculateDistance(foundAirport, entry.getKey()), radius) <= 0)
+                                    (Double.compare(calculateDistance(foundAirport, entry.getKey()), radius) <= 0)
                                             && !entry.getValue().isEmpty())
                             .map(Map.Entry::getValue)
                             .collect(Collectors.toList()));

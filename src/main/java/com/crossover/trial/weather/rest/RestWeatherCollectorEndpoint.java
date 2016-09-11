@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.util.Set;
 import java.util.logging.Level;
@@ -52,7 +51,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     @Override
     public Response getAirports() {
-        Set<String> retval = AtmosphericInfoHolder.getAirports().stream()
+        Set<String> retval = AtmosphericInfoHolder.getAirports().parallelStream()
                 .map(AirportData::getIata).collect(Collectors.toSet());
         return Response.status(Response.Status.OK).entity(retval).build();
     }
