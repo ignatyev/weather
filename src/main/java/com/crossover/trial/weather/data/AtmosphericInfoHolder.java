@@ -7,10 +7,7 @@ import com.crossover.trial.weather.DataPointType;
 import com.crossover.trial.weather.exceptions.AirportAdditionException;
 import com.crossover.trial.weather.exceptions.AirportNotFoundException;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -99,8 +96,9 @@ public class AtmosphericInfoHolder {
         return Collections.unmodifiableCollection(atmosphericInformation.values());
     }
 
-    public static Collection<AirportData> getAirports() {
-        return Collections.unmodifiableCollection(atmosphericInformation.keySet());
+    public static Set<String> getAirports() {
+        return atmosphericInformation.keySet().parallelStream()
+                .map(AirportData::getIata).collect(Collectors.toSet());
     }
 
     public static void removeAirport(String iata) throws AirportNotFoundException {

@@ -11,10 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * A REST implementation of the WeatherCollector API. Accessible only to airport weather collection
@@ -51,9 +49,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     @Override
     public Response getAirports() {
-        Set<String> retval = AtmosphericInfoHolder.getAirports().parallelStream()
-                .map(AirportData::getIata).collect(Collectors.toSet());
-        return Response.status(Response.Status.OK).entity(retval).build();
+        return Response.status(Response.Status.OK).entity(AtmosphericInfoHolder.getAirports()).build();
     }
 
 
@@ -72,7 +68,11 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
     @Override
     public Response addAirport(String iata, String latString, String longString) {
         try {
-            if (StringUtils.isEmpty(iata)) throw new AirportAdditionException("iata can not be empty");
+            if (StringUtils.isEmpty(iata) ||
+                    StringUtils.isEmpty(latString) ||
+                    StringUtils.isEmpty(longString)) {
+                throw new AirportAdditionException("iata, latitude and longitude can not be empty");
+            }
             AtmosphericInfoHolder.addAirport(iata.toUpperCase(), Double.valueOf(latString), Double.valueOf(longString));
         } catch (AirportAdditionException e) {
             LOGGER.log(Level.SEVERE, "Error while adding an airport", e);

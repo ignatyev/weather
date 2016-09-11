@@ -28,7 +28,7 @@ public class MathUtilsTest {
         ad2.setLatitude(55.5996);
         ad2.setLongitude(37.2712);
 
-        Assert.assertEquals(40, MathUtils.calculateDistance(ad2, ad1), 10);
+        Assert.assertEquals(40, MathUtils.calculateDistance(ad2, ad1), 1);
     }
 
 }

@@ -1,7 +1,5 @@
 package com.crossover.trial.weather.data;
 
-import com.crossover.trial.weather.AirportData;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +54,7 @@ public class Statistics {
         return retval;
     }
 
+    //TODO clarify what's happening here -- looks like a histogram but incorrect
     private static int[] getRadiusesHistogram() {
         int maxRadius = radiusRequestCounts.keySet().parallelStream()
                 .max(Double::compare)
@@ -65,7 +64,7 @@ public class Statistics {
         for (Map.Entry<Double, AtomicInteger> e : radiusRequestCounts.entrySet()) {
             Double radius = e.getKey();
             if (radius == null || radius < 0) continue;
-            int i = radius.intValue() % 10; //TODO clarify what's happening here
+            int i = radius.intValue() % 10;
             hist[i] += e.getValue().get();
         }
         return hist;
@@ -76,9 +75,8 @@ public class Statistics {
         if (totalRequests == 0) return new HashMap<>();
         // fraction of queries
         return getAirports().parallelStream()
-                .collect(Collectors.toMap(AirportData::getIata, airportData ->
-                        (double)airportRequestCounts
-                                .getOrDefault(airportData.getIata(), new AtomicInteger(0)).get()/totalRequests));
+                .collect(Collectors.toMap(s -> s, airport ->
+                        (double)airportRequestCounts.getOrDefault(airport, new AtomicInteger(0)).get()/totalRequests));
     }
 
     private static long getDatasize() {

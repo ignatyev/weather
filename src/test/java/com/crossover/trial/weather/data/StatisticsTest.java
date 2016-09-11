@@ -55,8 +55,8 @@ public class StatisticsTest {
         Statistics.updateRequestFrequency(IATA_CODE2, 10.0);
 
         iataFreq = (Map<String, Double>) Statistics.getStats().get(IATA_FREQ);
-        Assert.assertTrue(2.0/3 == iataFreq.get(IATA_CODE));
-        Assert.assertTrue(1.0/3 == iataFreq.get(IATA_CODE2));
+        Assert.assertEquals(2.0/3, iataFreq.get(IATA_CODE), 0);
+        Assert.assertEquals(1.0/3, iataFreq.get(IATA_CODE2), 0);
         /*radiusFreq = (int[]) Statistics.getStats().get(RADIUS_FREQ);
         Assert.assertEquals(11, radiusFreq.length);
         Assert.assertEquals(3, radiusFreq[0]);
